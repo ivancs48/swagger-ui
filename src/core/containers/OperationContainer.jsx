@@ -56,7 +56,7 @@ export default class OperationContainer extends PureComponent {
   }
 
   mapStateToProps(nextState, props) {
-    const { op, layoutSelectors, getConfigs } = props
+    const { op, layoutSelectors, getConfigs,operations } = props
     const { docExpansion, deepLinking, displayOperationId, displayRequestDuration, supportedSubmitMethods } = getConfigs()
     const showSummary = layoutSelectors.showSummary()
     const operationId = op.getIn(["operation", "__originalOperationId"]) || op.getIn(["operation", "operationId"]) || opId(op.get("operation"), props.path, props.method) || op.get("id")
@@ -67,6 +67,7 @@ export default class OperationContainer extends PureComponent {
     const security = op.getIn(["operation", "security"]) || props.specSelectors.security()
 
     return {
+      operations,
       operationId,
       isDeepLinkingEnabled,
       showSummary,
@@ -104,9 +105,17 @@ export default class OperationContainer extends PureComponent {
     }
   }
 
+  closeAllOperations = () => {
+    const { operations, layoutActions } = this.props
+    for(let item of operations){
+      layoutActions.show(["operations", item.tag, item.operationId], false)
+    }
+  }
+
   toggleShown =() => {
     let { layoutActions, tag, operationId, isShown } = this.props
     const resolvedSubtree = this.getResolvedSubtree()
+    this.closeAllOperations();
     if(!isShown && resolvedSubtree === undefined) {
       // transitioning from collapsed to expanded
       this.requestResolvedSubtree()
@@ -172,6 +181,7 @@ export default class OperationContainer extends PureComponent {
       isAuthorized,
       operationId,
       showSummary,
+      operations,
       isShown,
       jumpToKey,
       allowTryItOut,
@@ -211,6 +221,7 @@ export default class OperationContainer extends PureComponent {
       originalOperationId: resolvedSubtree.getIn(["operation", "__originalOperationId"]),
       showSummary,
       isShown,
+      operations,
       jumpToKey,
       allowTryItOut,
       request,

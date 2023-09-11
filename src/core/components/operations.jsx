@@ -18,6 +18,8 @@ export default class Operations extends React.Component {
     fn: PropTypes.func.isRequired
   }
 
+  variable = []
+
   render() {
     let {
       specSelectors,
@@ -50,6 +52,17 @@ export default class Operations extends React.Component {
     const OperationContainer = getComponent("OperationContainer", true)
     const OperationTag = getComponent("OperationTag")
     const operations = tagObj.get("operations")
+    operations.forEach((op) => {
+      const newElement = {
+        operationId: op.getIn(["operation", "__originalOperationId"]) || op.getIn(["operation", "operationId"]) || opId(op.get("operation"), props.path, props.method) || op.get("id"),
+        tag
+      }; 
+      // Comprueba si el elemento ya existe en el array antes de agregarlo
+      if (!this.variable.some((element) => element.operationId === newElement.operationId)) {
+        this.variable.push(newElement);
+      }
+    })
+    // console.log(this.variable);
     return (
       <OperationTag
         key={"operation-" + tag}
@@ -77,6 +90,7 @@ export default class Operations extends React.Component {
                   key={`${path}-${method}`}
                   specPath={specPath}
                   op={op}
+                  operations={this.variable}
                   path={path}
                   method={method}
                   tag={tag} />
